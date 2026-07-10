@@ -1,0 +1,50 @@
+# ==========================================
+# Odin Compiled Binaries & Build Artifacts
+# ==========================================
+# Odin outputs executables without an extension on Unix-like systems.
+# The following patterns ignore common naming conventions or target all root binaries.
+
+# Option A: If you compile your binary into a specific build directory (Recommended)
+/build/
+/bin/
+
+# Option B: If you compile directly to the root, block specific executable extensions
+*.exe
+*.dll
+*.so
+*.dylib
+*.pyd
+
+# Optional: If you use "odin run ." or "odin build ." directly in the root without 
+# specifying an output name, it generates a binary named after your directory.
+# Un-comment the line below if you want to block all non-extension root files:
+# /[^.]*
+
+# ==========================================
+# Developer Tools & Language Server (OLS)
+# ==========================================
+# Language server configuration and temporary files
+.ols/
+ols.json
+ols_profile.json
+
+# Tooling files
+*.lock
+
+# ==========================================
+# Operating System Overrides
+# ==========================================
+# Windows
+Thumbs.db
+Ehthumbs.db
+Desktop.ini
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Linux
+*~
+.fuse_hidden*
+.directory
