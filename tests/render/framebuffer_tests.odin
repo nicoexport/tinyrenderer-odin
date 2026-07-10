@@ -6,7 +6,7 @@ import "../../src/render"
 @(test)
 test_framebuffer_init :: proc(t: ^testing.T) {
     size: [2]int = { 200, 200 }
-    expected: int = size.x * size.y + 1
+    expected: int = size.x * size.y
 
     sut := render.framebuffer_init(size)
     defer render.framebuffer_destroy(&sut)
