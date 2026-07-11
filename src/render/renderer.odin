@@ -24,3 +24,11 @@ shutdown :: proc() {
 	framebuffer_destroy(&front_buffer)
 	framebuffer_destroy(&back_buffer)
 }
+
+clear_screen :: proc(color: u32) {
+	framebuffer_clear_color(active_buffer_ptr, color)
+}
+
+get_pixels :: proc() -> rawptr {
+	return raw_data(active_buffer_ptr.pixels)
+}
