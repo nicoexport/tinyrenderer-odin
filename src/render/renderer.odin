@@ -3,32 +3,38 @@ package render
 import "core:fmt"
 
 @(private)
-front_buffer: Framebuffer
+buffer_a: Framebuffer
 @(private)
-back_buffer: Framebuffer
+buffer_b: Framebuffer
 
-@(private)
-active_buffer_ptr: ^Framebuffer
+front_buffer: ^Framebuffer
+back_buffer: ^Framebuffer
+
 
 init :: proc(size: [2]int) {
 	fmt.println("Initializing Render System...")
 
-	front_buffer = framebuffer_init(size)
-	back_buffer = framebuffer_init(size)
+	buffer_a = framebuffer_init(size)
+	buffer_b = framebuffer_init(size)
 
-	active_buffer_ptr = &back_buffer
+	front_buffer = &buffer_a
+	back_buffer = &buffer_b
 }
 
 shutdown :: proc() {
 	fmt.println("Shutting down Render System...")
-	framebuffer_destroy(&front_buffer)
-	framebuffer_destroy(&back_buffer)
+	framebuffer_destroy(&buffer_a)
+	framebuffer_destroy(&buffer_b)
 }
 
-clear_screen :: proc(color: u32) {
-	framebuffer_clear_color(active_buffer_ptr, color)
+swap_buffers :: proc() {
+	front_buffer, back_buffer = back_buffer, front_buffer
 }
 
 get_pixels :: proc() -> rawptr {
-	return raw_data(active_buffer_ptr.pixels)
+	return raw_data(front_buffer.pixels)
+}
+
+clear_screen :: proc(color: u32) {
+	framebuffer_clear_color(back_buffer, color)
 }
