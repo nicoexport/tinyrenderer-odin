@@ -36,6 +36,20 @@ framebuffer_get_pixel :: proc(fb: ^Framebuffer, x: int, y: int) -> (u32, bool) {
 	return fb.pixels[index], true
 }
 
+framebuffer_write_pixel :: proc(fb: ^Framebuffer, x: int, y: int, color: u32) {
+	if x < 0 || y < 0 {
+		return
+	}
+
+	index := framebuffer_index(fb, x, y)
+
+	if index > len(fb.pixels) {
+		return
+	}
+
+	fb.pixels[index] = color
+}
+
 framebuffer_index :: proc(fb: ^Framebuffer, x: int, y: int) -> int {
 	return y * fb.width + x
 }

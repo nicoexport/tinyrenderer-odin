@@ -20,6 +20,7 @@ main :: proc() {
 	for !rl.WindowShouldClose() {
 		// drawing to back buffer
 		render.clear_screen(types.color_pack({255, 0, 0, 255}))
+		render.draw_line_screen_space({0, 0}, {100, 100}, types.color_pack({255, 255, 255, 255}))
 
 		// displaying front buffer
 		rl.UpdateTexture(texture, render.get_pixels())
