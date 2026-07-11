@@ -4,7 +4,7 @@
         {
             "label": "Odin: Run All Tests",
             "type": "shell",
-            "command": "odin test tests -all-packages",
+            "command": "odin test src -all-packages",
             "group": {
                 "kind": "test",
                 "isDefault": true
