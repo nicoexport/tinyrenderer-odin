@@ -1,5 +1,7 @@
 package render
 
+import "core:fmt"
+import "core:log"
 import "core:testing"
 
 @(test)
@@ -60,4 +62,13 @@ test_framebuffer_get_pixel :: proc(t: ^testing.T) {
 		testing.expect_value(t, result_ok, tc.expected_ok)
 		testing.expect_value(t, result, tc.expeceted)
 	}
+}
+
+@(test)
+test_obj_loader_load_obj :: proc(t: ^testing.T) {
+	mesh, ok := load_obj("res/model.obj")
+	defer mesh_delete(&mesh)
+
+	testing.expect_value(t, true, ok)
+	testing.expect_value(t, 2519, len(mesh.vertices))
 }
