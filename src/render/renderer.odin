@@ -13,6 +13,11 @@ buffer_b: Framebuffer
 front_buffer: ^Framebuffer
 back_buffer: ^Framebuffer
 
+// used to hold memory for when depth needs to be converted to color for ouput
+// TODO: rethink, if this is the right approach. For now it is definately fine.
+// I like that the render module owns the memory and frees it on shutdown.
+vis_depth_buffer: []u32
+
 init :: proc(size: [2]int) {
 	fmt.println("Initializing Render System...")
 
@@ -27,6 +32,7 @@ shutdown :: proc() {
 	fmt.println("Shutting down Render System...")
 	framebuffer_destroy(&buffer_a)
 	framebuffer_destroy(&buffer_b)
+	delete(vis_depth_buffer)
 }
 
 swap_buffers :: proc() {
@@ -35,6 +41,25 @@ swap_buffers :: proc() {
 
 get_pixels :: proc() -> rawptr {
 	return raw_data(front_buffer.pixels)
+}
+
+get_depth_visualized :: proc() -> rawptr {
+	// Automatically allocate or resize only when the framebuffer size changes
+	if len(vis_depth_buffer) != len(front_buffer.depths) {
+		if vis_depth_buffer != nil do delete(vis_depth_buffer)
+		vis_depth_buffer = make([]u32, len(front_buffer.depths))
+	}
+
+	// Process the data in-place using the private buffer
+	for depth, i in front_buffer.depths {
+		// remapping, since depth values range from -1 to 1
+		remapped := (depth + 1) / 2
+		d := clamp(remapped, 0.0, 1.0)
+		c := u8(d * 255.0)
+		vis_depth_buffer[i] = u32(c) | (u32(c) << 8) | (u32(c) << 16) | (0xFF << 24)
+	}
+
+	return raw_data(vis_depth_buffer)
 }
 
 clear_screen :: proc(color: u32) {

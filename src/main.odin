@@ -30,7 +30,7 @@ main :: proc() {
 		render.draw_mesh(&mesh, cam)
 
 		// displaying front buffer
-		rl.UpdateTexture(texture, render.get_pixels())
+		rl.UpdateTexture(texture, render.get_depth_visualized())
 		rl.BeginDrawing()
 		rl.DrawTexture(texture, 0, 0, rl.WHITE)
 		rl.EndDrawing()
