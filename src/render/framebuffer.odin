@@ -1,6 +1,7 @@
 #+private package
 package render
 
+import "core:fmt"
 import "core:slice"
 
 Framebuffer :: struct {

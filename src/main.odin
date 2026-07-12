@@ -13,14 +13,19 @@ main :: proc() {
 	render.init({WIDTH, HEIGHT})
 	defer render.shutdown()
 
-
 	img := rl.GenImageColor(WIDTH, HEIGHT, rl.BLUE)
 	texture := rl.LoadTextureFromImage(img)
 
 	for !rl.WindowShouldClose() {
 		// drawing to back buffer
-		render.clear_screen(types.color_pack({255, 0, 0, 255}))
-		render.draw_line_screen_space({0, 0}, {100, 100}, types.color_pack({255, 255, 255, 255}))
+		render.clear_screen(types.color_pack({0, 0, 0, 255}))
+		render.draw_triangle(
+			{0, 0, 0},
+			{400, 400, 0},
+			{450, 200, 0},
+			types.color_pack({255, 255, 255, 255}),
+		)
+		render.draw_line_screen_space({0, 0}, {350, 400}, types.color_pack({0, 255, 255, 255}))
 
 		// displaying front buffer
 		rl.UpdateTexture(texture, render.get_pixels())
