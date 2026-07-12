@@ -2,6 +2,7 @@ package render
 
 import "core:fmt"
 import "core:log"
+import "core:math"
 import "core:testing"
 
 @(test)
@@ -27,16 +28,31 @@ test_frame_buffer_height :: proc(t: ^testing.T) {
 }
 
 @(test)
-test_framebuffer_init :: proc(t: ^testing.T) {
+test_framebuffer_init_count :: proc(t: ^testing.T) {
 	size: [2]int = {300, 200}
 
 	sut := framebuffer_init(size)
 	defer framebuffer_destroy(&sut)
 
 	expected: int = size.x * size.y
-	result := len(sut.pixels)
+	result_pixels := len(sut.pixels)
+	result_depths := len(sut.depths)
 
-	testing.expect_value(t, result, expected)
+	testing.expect_value(t, expected, result_pixels)
+	testing.expect_value(t, expected, result_depths)
+}
+
+@(test)
+test_framebuffer_init_depth_value :: proc(t: ^testing.T) {
+	size: [2]int = {300, 200}
+
+	sut := framebuffer_init(size)
+	defer framebuffer_destroy(&sut)
+
+	expected := -math.INF_F32
+	result := sut.depths[0]
+
+	testing.expect_value(t, expected, result)
 }
 
 Framebuffer_Get_Pixel_TestCase :: struct {

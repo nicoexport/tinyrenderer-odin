@@ -38,7 +38,7 @@ get_pixels :: proc() -> rawptr {
 }
 
 clear_screen :: proc(color: u32) {
-	framebuffer_clear_color(back_buffer, color)
+	framebuffer_clear(back_buffer, color)
 }
 
 draw_line_screen_space :: proc(a_in: [2]int, b_in: [2]int, color: u32) {
@@ -161,7 +161,7 @@ draw_triangle :: proc(v0: [3]f32, v1: [3]f32, v2: [3]f32, color: u32) {
 
 			z: f32 = alpha * v0.z + beta * v1.z + gamma * v2.z
 
-			framebuffer_write_pixel(back_buffer, x, y, color)
+			framebuffer_write_pixel_depth(back_buffer, x, y, z, color)
 		}
 	}
 }
