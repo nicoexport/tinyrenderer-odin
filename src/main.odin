@@ -7,6 +7,8 @@ import rl "vendor:raylib"
 WIDTH :: 800
 HEIGHT :: 450
 
+do_draw_depth := false
+
 main :: proc() {
 	rl.InitWindow(WIDTH, HEIGHT, "raylib [core] example - basic window")
 
@@ -24,13 +26,24 @@ main :: proc() {
 	up: [3]f32 = {0, 1, 0}
 	cam: render.Camera = render.camera_init(eye, center, up)
 
+	// TODO: look into a real order of input, drawing, etc.
 	for !rl.WindowShouldClose() {
+		// handle input
+		if (rl.IsKeyPressed(.F1)) {
+			do_draw_depth = !do_draw_depth
+		}
+
 		// drawing to back buffer
 		render.clear_screen(types.color_pack({0, 0, 0, 255}))
 		render.draw_mesh(&mesh, cam)
 
 		// displaying front buffer
-		rl.UpdateTexture(texture, render.get_depth_visualized())
+		if do_draw_depth {
+			rl.UpdateTexture(texture, render.get_depth_visualized())
+		} else {
+			rl.UpdateTexture(texture, render.get_pixels())
+		}
+
 		rl.BeginDrawing()
 		rl.DrawTexture(texture, 0, 0, rl.WHITE)
 		rl.EndDrawing()
