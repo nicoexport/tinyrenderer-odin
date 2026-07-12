@@ -7,6 +7,8 @@ import rl "vendor:raylib"
 WIDTH :: 800
 HEIGHT :: 450
 
+CAMERA_MOVE_SPEED :: 2.5
+
 do_draw_depth := false
 
 main :: proc() {
@@ -24,7 +26,15 @@ main :: proc() {
 	eye: [3]f32 = {-1, 0, 2}
 	center: [3]f32 = {0, 0, 0}
 	up: [3]f32 = {0, 1, 0}
+
 	cam: render.Camera = render.camera_init(eye, center, up)
+	camera_ctrl := render.CameraController {
+		yaw         = -90.0, // Faces forward down the -Z axis initially
+		pitch       = 0.0,
+		sensitivity = 0.05,
+	}
+
+	rl.DisableCursor()
 
 	// TODO: look into a real order of input, drawing, etc.
 	for !rl.WindowShouldClose() {
@@ -33,8 +43,9 @@ main :: proc() {
 			do_draw_depth = !do_draw_depth
 		}
 
+		render.camera_update_look(&cam, &camera_ctrl, rl.GetMouseDelta())
 		dir := get_input_direction()
-		render.camera_move(&cam, dir, 20.0 * rl.GetFrameTime())
+		render.camera_move(&cam, dir, CAMERA_MOVE_SPEED * rl.GetFrameTime())
 
 		// drawing to back buffer
 		render.clear_screen(types.color_pack({0, 0, 0, 255}))
