@@ -33,6 +33,9 @@ main :: proc() {
 			do_draw_depth = !do_draw_depth
 		}
 
+		dir := get_input_direction()
+		render.camera_move(&cam, dir, 20.0 * rl.GetFrameTime())
+
 		// drawing to back buffer
 		render.clear_screen(types.color_pack({0, 0, 0, 255}))
 		render.draw_mesh(&mesh, cam)
@@ -52,4 +55,17 @@ main :: proc() {
 		render.swap_buffers()
 	}
 	rl.CloseWindow()
+}
+
+get_input_direction :: proc() -> [3]f32 {
+	dir := [3]f32{0, 0, 0}
+
+	if rl.IsKeyDown(.W) do dir.z += 1
+	if rl.IsKeyDown(.S) do dir.z -= 1
+	if rl.IsKeyDown(.D) do dir.x += 1
+	if rl.IsKeyDown(.A) do dir.x -= 1
+	if rl.IsKeyDown(.SPACE) do dir.y += 1
+	if rl.IsKeyDown(.LEFT_SHIFT) do dir.y -= 1
+
+	return dir
 }
