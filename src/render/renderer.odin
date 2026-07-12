@@ -100,6 +100,9 @@ draw_mesh :: proc(mesh: ^Mesh, cam: Camera) {
 	m_viewport := viewport(0, 0, width, height)
 	m_pmv := m_perspective * m_model_view
 
+	// resetting seed for the random color per face
+	rand.reset(0)
+
 	for face in mesh.faces {
 		v0 := mesh.vertices[face.x]
 		v1 := mesh.vertices[face.y]
@@ -133,7 +136,7 @@ draw_mesh :: proc(mesh: ^Mesh, cam: Camera) {
 }
 
 random_color_u32 :: proc() -> u32 {
-	return (rand.uint32() & 0xFFFFFF00) | 0x000000FF
+	return (rand.uint32() & 0x00FFFFFF) | 0xFF000000
 }
 
 draw_triangle :: proc(v0: [3]f32, v1: [3]f32, v2: [3]f32, color: u32) {
