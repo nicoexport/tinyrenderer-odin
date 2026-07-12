@@ -2,6 +2,8 @@ package render
 
 import "base:intrinsics"
 import "core:fmt"
+import "core:math/linalg"
+import "core:math/rand"
 
 @(private)
 buffer_a: Framebuffer
@@ -85,6 +87,55 @@ draw_line_screen_space :: proc(a_in: [2]int, b_in: [2]int, color: u32) {
 	}
 }
 
+// TODO: have one main camera as a global package variable state
+draw_mesh :: proc(mesh: ^Mesh, cam: Camera) {
+	width := back_buffer.width
+	height := back_buffer.height
+
+	m_model_view := look_at(cam.eye, cam.center, cam.up)
+	m_perspective := perspective(2, cam)
+	// NOTE: in my Zig tinyrenderer I didnt use the whole viewport size but rather something like:
+	// const m_viewport = viewport(@divTrunc(w, 16), @divTrunc(h, 16), @divTrunc(w * 7, 8), @divTrunc(h * 7, 8));
+	// check if this causes problems
+	m_viewport := viewport(0, 0, width, height)
+	m_pmv := m_perspective * m_model_view
+
+	for face in mesh.faces {
+		v0 := mesh.vertices[face.x]
+		v1 := mesh.vertices[face.y]
+		v2 := mesh.vertices[face.z]
+
+		// Odin supports matrix and vector math out of the box, YAY!
+		v0_clip := m_pmv * [4]f32{v0.x, v0.y, v0.z, 1.0}
+		v1_clip := m_pmv * [4]f32{v1.x, v1.y, v1.z, 1.0}
+		v2_clip := m_pmv * [4]f32{v2.x, v2.y, v2.z, 1.0}
+
+		// clipping geometry, thats too near to the camera for now
+		epsilon: f32 = 0.1
+		if v0_clip.w < epsilon || v1_clip.w < epsilon || v2_clip.w < epsilon {
+			continue
+		}
+
+		v0_ndc := v0_clip / v0_clip.w
+		v1_ndc := v1_clip / v1_clip.w
+		v2_ndc := v2_clip / v2_clip.w
+
+		v0_viewport := m_viewport * v0_ndc
+		v1_viewport := m_viewport * v1_ndc
+		v2_viewport := m_viewport * v2_ndc
+
+		v0_screen := [3]f32{v0_viewport.x, v0_viewport.y, v0_ndc.z}
+		v1_screen := [3]f32{v1_viewport.x, v1_viewport.y, v1_ndc.z}
+		v2_screen := [3]f32{v2_viewport.x, v2_viewport.y, v2_ndc.z}
+
+		draw_triangle(v0_screen, v1_screen, v2_screen, random_color_u32())
+	}
+}
+
+random_color_u32 :: proc() -> u32 {
+	return (rand.uint32() & 0xFFFFFF00) | 0x000000FF
+}
+
 draw_triangle :: proc(v0: [3]f32, v1: [3]f32, v2: [3]f32, color: u32) {
 	bb := bounding_box_triangle_2d(f32, v0.xy, v1.xy, v2.xy)
 	total_area := signed_triangle_area(v0.xy, v1.xy, v2.xy)
@@ -129,4 +180,46 @@ bounding_box_triangle_2d :: proc(
 signed_triangle_area :: proc(a: [2]f32, b: [2]f32, c: [2]f32) -> f32 {
 	rect_area := (b.y - a.y) * (b.x + a.x) + (c.y - b.y) * (c.x + b.x) + (a.y - c.y) * (a.x + c.x)
 	return 0.5 * rect_area
+}
+
+viewport :: proc(x_in: int, y_in: int, w_in: int, h_in: int) -> matrix[4, 4]f32 {
+	x, y, w, h := f32(x_in), f32(y_in), f32(w_in), f32(h_in)
+	return matrix[4, 4]f32{
+		w / 2, 0, 0, x + w / 2,
+		0, -h / 2, 0, y + h / 2,
+		0, 0, 1, 0,
+		0, 0, 0, 1,
+	}
+}
+
+perspective :: proc(f: f32, cam: Camera) -> Mat4 {
+	scale := linalg.length((cam.eye - cam.center))
+	return matrix[4, 4]f32{
+		1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 1, 0,
+		0, 0, -1.0 / f, scale,
+	}
+}
+
+look_at :: proc(eye: Vec3, center: Vec3, up: Vec3) -> Mat4 {
+	n := linalg.normalize(eye - center)
+	l := linalg.cross(up, n)
+	m := linalg.cross(n, l)
+
+	view := matrix[4, 4]f32{
+		l.x, l.y, l.z, 0,
+		m.x, m.y, m.z, 0,
+		n.x, n.y, n.z, 0,
+		0, 0, 0, 1,
+	}
+
+	model := matrix[4, 4]f32{
+		1, 0, 0, -center.x,
+		0, 1, 0, -center.y,
+		0, 0, 1, -center.z,
+		0, 0, 0, 1,
+	}
+
+	return view * model
 }

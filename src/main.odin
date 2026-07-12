@@ -16,16 +16,18 @@ main :: proc() {
 	img := rl.GenImageColor(WIDTH, HEIGHT, rl.BLUE)
 	texture := rl.LoadTextureFromImage(img)
 
+	mesh, ok := render.load_obj("res/model.obj")
+	defer render.mesh_delete(&mesh)
+
+	eye: [3]f32 = {-1, 0, 2}
+	center: [3]f32 = {0, 0, 0}
+	up: [3]f32 = {0, 1, 0}
+	cam: render.Camera = render.camera_init(eye, center, up)
+
 	for !rl.WindowShouldClose() {
 		// drawing to back buffer
 		render.clear_screen(types.color_pack({0, 0, 0, 255}))
-		render.draw_triangle(
-			{0, 0, 0},
-			{400, 400, 0},
-			{450, 200, 0},
-			types.color_pack({255, 255, 255, 255}),
-		)
-		render.draw_line_screen_space({0, 0}, {350, 400}, types.color_pack({0, 255, 255, 255}))
+		render.draw_mesh(&mesh, cam)
 
 		// displaying front buffer
 		rl.UpdateTexture(texture, render.get_pixels())
